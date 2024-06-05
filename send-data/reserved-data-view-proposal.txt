@@ -1,0 +1,56 @@
+//https://chatgpt.com/share/fd3a6e53-0fdf-4bcf-a4d5-aa39066e438f
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class ViewProposalPage extends StatefulWidget {
+  @override
+  _ViewProposalPageState createState() => _ViewProposalPageState();
+}
+
+class _ViewProposalPageState extends State<ViewProposalPage> {
+  List<Map<String, dynamic>> studentData = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchStudentData();
+  }
+
+  Future<void> fetchStudentData() async {
+    var url = Uri.parse('http://192.168.34.24/send-data/fetch_student_data.php');
+    var response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      setState(() {
+        studentData = json.decode(response.body);
+      });
+    } else {
+      print('Failed to fetch student data');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('View Proposal'),
+      ),
+      body: Center(
+        child: studentData.isNotEmpty
+            ? ListView.builder(
+                itemCount: studentData.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text('Student ID: ${studentData[index]['student_id']}'),
+                    subtitle: Text('Student Name: ${studentData[index]['student_name']}'),
+                    // Add more details as needed
+                  );
+                },
+              )
+            : CircularProgressIndicator(), // Show loading indicator while data is being fetched
+      ),
+    );
+  }
+}
